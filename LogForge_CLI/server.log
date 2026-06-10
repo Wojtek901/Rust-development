@@ -1,0 +1,5 @@
+[2026-06-08 12:00:01] INFO: Polaczenie ustanowione z IP 192.168.1.50
+[2026-06-08 12:05:22] WARN: Wysokie zuzycie procesora: 85%
+[2026-06-08 12:10:00] ERROR: Baza danych nie odpowiada (Timeout)
+[2026-06-08 12:12:15] INFO: Uzytkownik wylogowany
+[2026-06-08 12:15:30] ERROR: Blad autoryzacji tokenu JWT
