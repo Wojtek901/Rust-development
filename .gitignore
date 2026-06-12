@@ -1,2 +1,3 @@
 target/
 rustgit/.rustgit
+budget_api/purchased.db
