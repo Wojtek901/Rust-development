@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rust Wasm Test</title>
+</head>
+<body>
+    <h1>WebAssembly Cruncher</h1>
+    <button id="calc-btn">Rust computetion started</button>
+
+    <script type="module">
+        import init, { find_primes } from './pkg/wasm_cruncher.js';
+
+        async function run() {
+            await init();
+
+            const button = document.getElementById('calc-btn');
+
+            button.addEventListener('click', () => {
+                const limit = 200000;
+
+                const startTime = performance.now();
+
+                const primesFound = find_primes(limit);
+
+                const endTime = performance.now();
+                const timeTaken = Math.round(endTime - startTime);
+
+                alert(`Rust found ${primesFound} prime numbers in ${timeTaken} miliseconds!`);
+            });
+        }
+
+        run();
+    </script>
+</body>
+</html>
