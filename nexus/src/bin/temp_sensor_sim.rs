@@ -5,7 +5,7 @@ use rand::Rng;
 
 #[derive(serde::Serialize)]
 struct TemperatureMessage{
-    device_id: String,
+    sensor_id: String,
     temperature: f64,
 }
 
@@ -18,7 +18,7 @@ async fn main(){
 
     let sensor_id: String = String::from("SENSOR-1-TEMP");
     let mut message_to_send = TemperatureMessage{
-        device_id: sensor_id,
+        sensor_id: sensor_id,
         temperature: 0.0,
     };
 
