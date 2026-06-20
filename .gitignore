@@ -1,3 +1,4 @@
 target/
 rustgit/.rustgit
 budget_api/purchased.db
+LogCruncher/data.txt
