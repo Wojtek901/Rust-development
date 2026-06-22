@@ -1,14 +1,17 @@
 use eframe::egui;
 use sysinfo::System;
+use egui_plot::{Line, Plot};
 
 struct NeonMonitor{
     sys: System,
+    cpu_history: Vec<f32>,
 }
 
 impl Default for NeonMonitor{
     fn default() -> Self{
         Self{
             sys: System::new_all(),
+            cpu_history: vec![0.0;100],
         }
     }
 }
@@ -17,6 +20,13 @@ impl eframe::App for NeonMonitor{
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame){
         self.sys.refresh_cpu();
         self.sys.refresh_memory();
+
+        let global_usage = self.sys.global_cpu_info().cpu_usage();
+        self.cpu_history.push(global_usage);
+
+        if self.cpu_history.len() > 100{
+            self.cpu_history.remove(0);
+        }
 
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui|{
             let cpu_name = self.sys.cpus()[0].brand();
@@ -41,7 +51,17 @@ impl eframe::App for NeonMonitor{
 
             ui.separator();
 
-            ui.heading("CPU usage");
+            ui.heading("Full CPU usage");
+
+            let points: Vec<[f64; 2]> = self.cpu_history.iter().enumerate().map(|(x, &y)| [x as f64, y as f64]).collect();
+            let line = Line::new(points).fill(0.0);
+            Plot::new("CPU plot").height(100.0).include_y(0.0).include_y(100.0).show(ui, |plot_ui|{
+                plot_ui.line(line)
+            });
+
+            ui.separator();
+
+            ui.heading("CPU usage by core");
 
             egui::ScrollArea::vertical().show(ui, |ui|{
                 for (i, core) in self.sys.cpus().iter().enumerate(){
