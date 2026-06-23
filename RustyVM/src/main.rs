@@ -1,3 +1,5 @@
+use std::fs;
+
 #[derive(Debug)]
 enum Command {
     Push(f32),
@@ -9,18 +11,46 @@ enum Command {
     Jnz(usize),
 }
 
-fn main() {
-    let program = vec![
-        Command::Push(6.0),
-        Command::Dup,
-        Command::Print,
-        Command::Push(1.0),
-        Command::Sub,
-        Command::Dup,
-        Command::Jnz(1),
-        Command::Halt,
-    ];
+fn parse_file(file_name: &str) -> Vec<Command>{
+    let mut program: Vec<Command> = Vec::new();
+    let file_content = fs::read_to_string(file_name).expect("File does not exist or is in other directory.");
 
+    for (i, line) in file_content.lines().enumerate(){
+        let content: Vec<&str> = line.split_whitespace().collect();
+
+        if content.is_empty(){
+            continue;
+        }
+
+        match content[0].to_uppercase().as_str() {
+            "ADD" => {program.push(Command::Add)}
+            "PRINT" => program.push(Command::Print),
+            "HALT" => program.push(Command::Halt),
+            "SUB" => program.push(Command::Sub),
+            "DUP" => program.push(Command::Dup),
+
+            "PUSH" => {
+                let val_to_push = content.get(1).expect("Command push should be given value to push: Push <value>");
+                let value = val_to_push.parse().expect("Wrong symbol, <value> should be a number");
+                program.push(Command::Push(value));
+            }
+
+            "JNZ" => {
+                let val_to_push = content.get(1).expect("Command Jnz should be given value to jump to: Jnz <value>");
+                let value = val_to_push.parse().expect("Wrong symbol, <value> should be a number");
+                program.push(Command::Jnz(value));
+            }
+
+            unknown_command => {
+                panic!("Wrong command in line {}. Recieved unknown instruction {}.", i, unknown_command);
+            }
+        }
+    }
+
+    program
+}
+
+fn run_vm(program: Vec<Command>){
     let mut pc: usize = 0;
     let mut stack: Vec<f32> = Vec::new();
 
@@ -107,4 +137,10 @@ fn main() {
 
         pc += 1;
     }
+}
+
+fn main() {
+    let program: Vec<Command> = parse_file("program.rvm");
+
+    run_vm(program);
 }
