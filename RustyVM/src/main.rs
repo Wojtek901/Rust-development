@@ -4,14 +4,20 @@ enum Command {
     Add,
     Print,
     Halt,
+    Sub,
+    Dup,
+    Jnz(usize),
 }
 
 fn main() {
     let program = vec![
-        Command::Push(5.0),
         Command::Push(6.0),
-        Command::Add,
+        Command::Dup,
         Command::Print,
+        Command::Push(1.0),
+        Command::Sub,
+        Command::Dup,
+        Command::Jnz(1),
         Command::Halt,
     ];
 
@@ -59,6 +65,43 @@ fn main() {
             Command::Halt => {
                 println!("finish");
                 break;
+            }
+
+            Command::Sub => {
+                match (stack.pop(), stack.pop()) {
+                    (Some(b), Some(a)) => {
+                        let result = a - b;
+                        stack.push(result);
+                    }
+                    _ => {
+                        println!("No number on stack");
+                        break;
+                    }
+                }
+            }
+
+            Command::Dup => {
+                match stack.pop(){
+                    Some(value) => {
+                        stack.push(value);
+                        stack.push(value);
+                    }
+                    None => {
+                        println!("Empty stack.")
+                    }
+                }
+            }
+
+            Command::Jnz(jump) => {
+                if let Some(condition) = stack.pop() {
+                    if condition != 0.0 {
+                        pc = *jump;
+                        continue;
+                    }
+                } else {
+                    println!("No number on stack");
+                    break;
+                }
             }
         }
 
