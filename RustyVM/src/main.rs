@@ -9,6 +9,8 @@ enum Command {
     Sub,
     Dup,
     Jnz(usize),
+    Store(usize),
+    Load(usize),
 }
 
 fn parse_file(file_name: &str) -> Vec<Command>{
@@ -30,15 +32,27 @@ fn parse_file(file_name: &str) -> Vec<Command>{
             "DUP" => program.push(Command::Dup),
 
             "PUSH" => {
-                let val_to_push = content.get(1).expect("Command push should be given value to push: Push <value>");
+                let val_to_push = content.get(1).expect("Command <Push> should be given value to push: Push <value>");
                 let value = val_to_push.parse().expect("Wrong symbol, <value> should be a number");
                 program.push(Command::Push(value));
             }
 
             "JNZ" => {
-                let val_to_push = content.get(1).expect("Command Jnz should be given value to jump to: Jnz <value>");
+                let val_to_push = content.get(1).expect("Command <Jnz> should be given value to jump to: Jnz <value>");
                 let value = val_to_push.parse().expect("Wrong symbol, <value> should be a number");
                 program.push(Command::Jnz(value));
+            }
+
+            "STORE" => {
+                let address_str = content.get(1).expect("Command <Store> should be given address: Store <address>");
+                let address = address_str.parse().expect("Wrong symbol, <address> should be a number");
+                program.push(Command::Store(address));
+            }
+
+            "LOAD" => {
+                let address_str = content.get(1).expect("Command <Load> should be given address: Load <address>");
+                let address = address_str.parse().expect("Wrong symbol, <address> should be a number");
+                program.push(Command::Load(address));
             }
 
             unknown_command => {
@@ -53,6 +67,7 @@ fn parse_file(file_name: &str) -> Vec<Command>{
 fn run_vm(program: Vec<Command>){
     let mut pc: usize = 0;
     let mut stack: Vec<f32> = Vec::new();
+    let mut ram: Vec<f32> = vec![0.0; 256];
 
     loop {
         if pc >= program.len() {
@@ -133,6 +148,20 @@ fn run_vm(program: Vec<Command>){
                     break;
                 }
             }
+
+            Command::Store(address) => {
+                if let Some(value) = stack.pop() {
+                    ram[*address] = value;
+                } else {
+                    println!("No number on stack");
+                    break;
+                }
+            }
+
+            Command::Load(address) => {
+                let value = ram[*address];
+                stack.push(value);
+            }
         }
 
         pc += 1;
@@ -140,7 +169,7 @@ fn run_vm(program: Vec<Command>){
 }
 
 fn main() {
-    let program: Vec<Command> = parse_file("program.rvm");
+    let program: Vec<Command> = parse_file("program_ram.rvm");
 
     run_vm(program);
 }
